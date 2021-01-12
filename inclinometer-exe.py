@@ -27,39 +27,39 @@ def intConfig(port, baudRate):
 #--------------------------------------------------------------------------
 
 #Estabelecendo comunicação serial
-print("Especifique a porta serial utilizada para comunicação")
+print("Especifique a porta serial utilizada para comunicação (ex. COM10)")
 port=input()
-print("Especifique o baudrate utilizado para comunicação")
+print("Especifique o baudrate utilizado para comunicação (ex. 9600)")
 baudRate=input()
 
 
 try:
     ser=intConfig(port, baudRate)
 except:
-    print("porta n aberta agora!!")
+    print("Error ao abrir a porta serial")
     
     
 #Recebendo dados do Raspberry
 startMarker = str('<').encode()
-print("Deseja coletar leitura?")
+print("Deseja coletar leitura? [y,n]")
 ans=input()
 while (ans=="y"):
     ser.reset_input_buffer()           # Limpa o buffer de entrada da porta serial
     status=False
     while (status==False):
         if (ser.read()==startMarker and ser.read()==startMarker):
-            a=ser.read(8)
-            b=struct.unpack_from('f', a, offset=0)
-            c=struct.unpack_from('f', a, offset=4)
+            a=ser.read(16)
+            b=struct.unpack_from('d', a, offset=0)
+            c=struct.unpack_from('d', a, offset=8)
             print("Sensor 1", b)
             print("Sensor 2", c)
             time.sleep(1)
             status=True
         else:
-            print("Leitura Instável ou Nula")
+            print("Aguardando leitura consistente")
             time.sleep(1)
         
-    print("Deseja coletar outra leitura?")
+    print("Deseja coletar outra leitura? [y,n]")
     ans=input()
 
 ser.reset_input_buffer()
