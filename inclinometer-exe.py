@@ -9,7 +9,6 @@ import serial
 import struct
 import time
 
-
 #--------------------------------------------------------------------------
 '''
 Função utilizada para iniciar e configurar a comunicação serial
@@ -44,24 +43,23 @@ startMarker = str('<').encode()
 print("Deseja coletar leitura? [y,n]")
 ans=input()
 while (ans=="y"):
-    ser.reset_input_buffer()           # Limpa o buffer de entrada da porta serial
+    ser.reset_input_buffer()          
     status=False
     while (status==False):
+        #ser.reset_input_buffer()
         if (ser.read()==startMarker and ser.read()==startMarker):
             a=ser.read(16)
-            b=struct.unpack_from('d', a, offset=0)
-            c=struct.unpack_from('d', a, offset=8)
-            print("Sensor 1", b)
-            print("Sensor 2", c)
-            time.sleep(1)
+            s1=struct.unpack_from('d', a, offset=0)
+            s2=struct.unpack_from('d', a, offset=8)
+             
+            print("Sensor 1", s1)
+            print("Sensor 2", s2)
+
             status=True
-        else:
-            print("Aguardando leitura consistente")
-            time.sleep(1)
-        
+    
     print("Deseja coletar outra leitura? [y,n]")
     ans=input()
-
+    
 ser.reset_input_buffer()
 ser.close()
 time.sleep(0.2)
