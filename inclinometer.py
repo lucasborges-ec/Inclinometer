@@ -1,6 +1,6 @@
-#! /usr/bin/env python3
+
 import time
-time.sleep(10) #Wainting for the end of booting time
+time.sleep(30) #Wainting for the end of booting time
 
 import serial
 import struct
