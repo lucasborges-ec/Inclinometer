@@ -1,11 +1,12 @@
 
 import time
-time.sleep(30) #Wainting for the end of booting time
+#time.sleep(30) #Wainting for the end of booting time
 
 import serial
 import struct
 import numpy as np
 import spidev
+import Adafruit_ADS1x15
 
 
 #-----------------------------------------------------------------------------------#
@@ -30,13 +31,16 @@ def readSensor(spi):
     d1b=spi.xfer([0b00010001, 0x0, 0x0])        # Try xfer2!!!
     x1=( d1a[1] << 8 ) + d1a[2] >> 5                                           # 11 bits in 2 bytes size mensage
     y1=( d1b[1] << 8 ) + d1b[2] >> 5
-    a=(x1-y1)/6554.0
+    a=(x1-y1)
     return a
 #-----------------------------------------------------------------------------------#
 
 # Creates a object
 spi1=spidev.SpiDev()
 spi2=spidev.SpiDev()
+
+# Create an ADS1115 ADC (16-bit) instance.
+adc = Adafruit_ADS1x15.ADS1115()
 
 # Starts SPI communication
 spi1.open(0,0)
@@ -54,22 +58,27 @@ baudRate=9600
 
 ser=intConfig(port[1], baudRate)
 
+
 # READING SENSORS
+GAIN = 2/3
 
 samples=50
 #std=np.deg2rad(np.sin(0.3)) #graus
-std=0.3
+std1=205
+std2=2000
 avr1=np.zeros(samples)
 avr2=np.zeros(samples)
 
 try:
     while True:
         for i in range (samples):
-            avr1[i]=np.rad2deg(np.arcsin(readSensor(spi1)))
-            avr2[i]=np.rad2deg(np.arcsin(readSensor(spi2)))
-        if (np.std(avr1)<std or np.std(avr2)<std):
+            avr1[i]=readSensor(spi1)
+            avr2[i]=adc.read_adc_difference(0, gain=GAIN)
+            #avr2[i]=np.rad2deg(np.arcsin(readSensor(spi2)))
+            time.sleep(0.01)
+        if ((np.std(avr1)<std1) and (np.std(avr2)<std2)):
             data1=struct.pack('d',np.mean(avr1))
-            data2=struct.pack('d',np.mean(avr2))
+            data2=struct.pack('d',np.mean(avr2)) #MUDAR DADO ENVIADO
 
             ser.write('<'.encode())
             ser.write('<'.encode())
